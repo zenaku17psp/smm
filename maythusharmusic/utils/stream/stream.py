@@ -1,12 +1,10 @@
 #stream.py
-import os
-from random import randint
 from typing import Union
 
 from pyrogram.types import InlineKeyboardMarkup
 
 import config
-from maythusharmusic import Carbon, YouTube, app
+from maythusharmusic import YouTube, app
 from maythusharmusic.core.call import Hotty
 from maythusharmusic.misc import db
 from maythusharmusic.utils.database import add_active_video_chat, is_active_chat
@@ -75,12 +73,10 @@ async def stream(
                     db[chat_id] = []
                 status = True if video else None
 
-                # --- START OF MODIFICATION (LOCATION 1) ---
                 try:
                     await mystic.edit_text(_["play_dl"].format(title))
                 except KeyError:
                     await mystic.edit_text(f"Dow͟n͟l͟o͟a͟d͟ ဆွဲနေပါသည် ● ᥫ᭡ {title}")
-                # --- END OF MODIFICATION ---
 
                 try:
                     file_path, direct = await YouTube.download(
@@ -126,17 +122,11 @@ async def stream(
             return
         else:
             link = await HottyBin(msg)
-            lines = msg.count("\n")
-            if lines >= 17:
-                car = os.linesep.join(msg.split(os.linesep)[:17])
-            else:
-                car = msg
-            carbon = await Carbon.generate(car, randint(100, 10000000))
             upl = close_markup(_)
-            return await app.send_photo(
+            # Carbon logic removed, sending simple message instead
+            return await app.send_message(
                 original_chat_id,
-                photo=carbon,
-                caption=_["play_21"].format(position, link),
+                text=_["play_21"].format(position, link),
                 reply_markup=upl,
             )
     elif streamtype == "youtube":
@@ -152,12 +142,10 @@ async def stream(
         if current_queue is not None and len(current_queue) >= 50:
             return await app.send_message(original_chat_id, "You can't add more than 50 songs to the queue.")
 
-        # --- START OF MODIFICATION (LOCATION 2) ---
         try:
             await mystic.edit_text(_["play_dl"].format(title))
         except KeyError:
             await mystic.edit_text(f"Dow͟n͟l͟o͟a͟d͟ ဆွဲနေပါသည် ● ᥫ᭡ {title}")
-        # --- END OF MODIFICATION ---
 
         try:
             file_path, direct = await YouTube.download(
@@ -170,7 +158,7 @@ async def stream(
             await put_queue(
                 chat_id,
                 original_chat_id,
-                file_path,  # <-- (FAST JOIN ပြင်ဆင်မှု ၁)
+                file_path,
                 title,
                 duration_min,
                 user_name,
@@ -198,7 +186,7 @@ async def stream(
             await put_queue(
                 chat_id,
                 original_chat_id,
-                file_path,  # <-- (FAST JOIN ပြင်ဆင်မှု ၂)
+                file_path,
                 title,
                 duration_min,
                 user_name,
