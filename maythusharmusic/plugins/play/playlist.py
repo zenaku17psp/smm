@@ -12,7 +12,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from youtube_search import YoutubeSearch
 
 from config import BANNED_USERS, SERVER_PLAYLIST_LIMIT
-from maythusharmusic import Carbon, app
+from maythusharmusic import app
 from maythusharmusic.utils.decorators.language import language, languageCB
 from maythusharmusic.utils.inline.playlist import (
     botplaylist_markup,
@@ -128,14 +128,10 @@ async def check_playlist(client, message: Message, _):
         msg += f"\n\n{count}- {title[:70]}\n"
         msg += _["playlist_5"].format(duration)
     link = await HottyBin(msg)
-    lines = msg.count("\n")
-    if lines >= 17:
-        car = os.linesep.join(msg.split(os.linesep)[:17])
-    else:
-        car = msg
-    carbon = await Carbon.generate(car, randint(100, 10000000000))
+    
+    # Removed Carbon generation and replaced with a text message
     await get.delete()
-    await message.reply_photo(carbon, caption=_["playlist_15"].format(link))
+    await message.reply_text(_["playlist_15"].format(link))
 
 
 async def get_keyboard(_, user_id):
