@@ -19,12 +19,12 @@ api = SafoneAPI()
 
 from .platforms import *
 
-Apple = AppleAPI()
-Carbon = CarbonAPI()
-SoundCloud = SoundAPI()
-Spotify = SpotifyAPI()
-Resso = RessoAPI()
+#Apple = AppleAPI()
+#Carbon = CarbonAPI()
+#SoundCloud = SoundAPI()
+#Spotify = SpotifyAPI()
+#Resso = RessoAPI()
 Telegram = TeleAPI()
 YouTube = YouTubeAPI()
 
-APP = "sasukevipmusicbot"  # connect music api key "Dont change it"
+APP = "Characterscatcherbot"  # connect music api key "Dont change it"
