@@ -189,6 +189,7 @@ class YouTubeAPI:
             link = self.base + link
         if "&" in link:
             link = link.split("&")[0]
+        # Video Info only - not used for streaming anymore
         cmd = f"yt-dlp --cookies {self.cookie_path} -g -f best[height<=?720][width<=?1280] {link}"
         proc = await asyncio.create_subprocess_shell(
             cmd,
@@ -325,12 +326,13 @@ class YouTubeAPI:
             x.download([link])
             return xyz
 
-        # --- Fixed Video Download for MP4 ---
+        # --- IMPORTANT: FORCE LOCAL DOWNLOAD FOR VIDEO ---
+        # Direct URL streaming causes 403 Forbidden (No Audio/Video), so we download it.
         def video_dl():
             opts = common_opts.copy()
             opts.update({
-                # Try simple format first to avoid merge issues
-                "format": "best[ext=mp4]/best",
+                # Download Best MP4 available (up to 720p)
+                "format": "best[ext=mp4]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best",
                 "outtmpl": "downloads/%(id)s.%(ext)s",
             })
             x = yt_dlp.YoutubeDL(opts)
@@ -342,7 +344,6 @@ class YouTubeAPI:
             return xyz
 
         def song_video_dl():
-            # More robust format selection
             formats = f"{format_id}+bestaudio/best"
             fpath = f"downloads/{title}"
             opts = common_opts.copy()
@@ -354,7 +355,6 @@ class YouTubeAPI:
             })
             x = yt_dlp.YoutubeDL(opts)
             x.download([link])
-        # ------------------------------------
 
         def song_audio_dl():
             fpath = f"downloads/{title}.%(ext)s"
@@ -378,18 +378,9 @@ class YouTubeAPI:
                 fpath = f"downloads/{title}.mp3"
                 return fpath
             elif video:
-                if await is_on_off(1):
-                    direct = True
-                    downloaded_file = await loop.run_in_executor(None, video_dl)
-                else:
-                    cmd = f"yt-dlp --cookies {self.cookie_path} -g -f best[ext=mp4] {link}"
-                    proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-                    stdout, stderr = await proc.communicate()
-                    if stdout:
-                        downloaded_file = stdout.decode().split("\n")[0]
-                        direct = None
-                    else:
-                        return None, None # Return proper None
+                # Always download video locally to avoid "No Video/Audio" issues
+                direct = True
+                downloaded_file = await loop.run_in_executor(None, video_dl)
             else:
                 direct = True
                 downloaded_file = await loop.run_in_executor(None, audio_dl)
@@ -397,6 +388,5 @@ class YouTubeAPI:
             return downloaded_file, direct
             
         except Exception as e:
-            # If download fails, return None so bot can handle it
             print(f"Download Error: {e}")
             return None, None
